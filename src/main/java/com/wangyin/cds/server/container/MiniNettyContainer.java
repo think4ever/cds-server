@@ -79,9 +79,9 @@ public class MiniNettyContainer extends SimpleChannelInboundHandler<FullHttpRequ
 			
 			boolean useChunkMode = contentLength == -1;
 			if (!useChunkMode) {
-				HttpHeaders.addHeader(response, HttpHeaders.Names.CONTENT_LENGTH, contentLength);
 				response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(responseContext
 						.getStatus()));
+				HttpHeaders.addHeader(response, HttpHeaders.Names.CONTENT_LENGTH, contentLength);
 			}else{
 				response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.valueOf(responseContext.getStatus()));
 			}

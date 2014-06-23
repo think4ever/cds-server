@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+	<!-- 全局别名设置 -->
+    <typeAliases>
+    	<!-- DO全局别名 -->
+        <typeAlias alias="DbInfoDO" type="com.wangyin.cds.service.dal.dataobject.DbInfoDO"/>
+        <typeAlias alias="DbGroupDO" type="com.wangyin.cds.service.dal.dataobject.DbGroupDO"/>
+        <typeAlias alias="DbClusterDO" type="com.wangyin.cds.service.dal.dataobject.DbClusterDO"/>
+        <typeAlias alias="DataSourceDO" type="com.wangyin.cds.service.dal.dataobject.DataSourceDO"/>
+        <typeAlias alias="DbClusterDbGroupRelationDO" type="com.wangyin.cds.service.dal.dataobject.DbClusterDbGroupRelationDO"/>
+        <typeAlias alias="DbInfoDbGroupRelationDO" type="com.wangyin.cds.service.dal.dataobject.DbInfoDbGroupRelationDO"/>
+        <typeAlias alias="SplittingKeyDO" type="com.wangyin.cds.service.dal.dataobject.SplittingKeyDO"/>
+        <typeAlias alias="ColumnInfoDO" type="com.wangyin.cds.service.dal.dataobject.ColumnInfoDO"/>
+        <typeAlias alias="DepotsTableRulesDO" type="com.wangyin.cds.service.dal.dataobject.DepotsTableRulesDO"/>
+        
+        <!-- Model类全局别名 -->
+        <typeAlias alias="ColumnInfo" type="com.wangyin.cds.service.model.ColumnInfo"/>
+        <typeAlias alias="DbGroup" type="com.wangyin.cds.service.model.DbGroup"/>
+        
+        <typeAlias alias="DbGroupExt" type="com.wangyin.cds.service.model.DbGroupExt"/>
+        <typeAlias alias="DbInfoExt" type="com.wangyin.cds.service.model.DbInfoExt"/>
+        <typeAlias alias="SplittingKeyExt" type="com.wangyin.cds.service.model.SplittingKeyExt"/>
+        <typeAlias alias="DepotsTableRulesExt" type="com.wangyin.cds.service.model.DepotsTableRulesExt"/>
+    </typeAliases>
+    
+    <!-- 数据源配置 -->
+    <environments default="development">    
+        <environment id="development">    
+            <transactionManager type="JDBC"/>    
+            <dataSource type="POOLED">    
+                <property name="driver" value="com.mysql.jdbc.Driver"/>    
+                <property name="url" value="jdbc:mysql://127.0.0.1:3307/mydb"/>    
+                <property name="username" value="root"/>    
+                <property name="password" value="5978222"/>    
+            </dataSource>    
+        </environment>    
+    </environments>
+    
+    <!-- 引入SQL映射文件 -->
+    <mappers>
+        <mapper resource="sqlmap/DbInfoDAO.xml" />
+        <mapper resource="sqlmap/DbGroupDAO.xml" />
+        <mapper resource="sqlmap/DbClusterDAO.xml" />
+        <mapper resource="sqlmap/DataSourceDAO.xml" />
+        <mapper resource="sqlmap/DbClusterDbGroupRelationDAO.xml" />
+        <mapper resource="sqlmap/DbInfoDbGroupRelationDAO.xml" />
+        <mapper resource="sqlmap/ColumnInfoDAO.xml" />
+        <mapper resource="sqlmap/SplittingKeyDAO.xml" />
+        <mapper resource="sqlmapext/DbGroupExtDAO.xml" />
+        <mapper resource="sqlmapext/DbInfoExtDAO.xml" />
+        <mapper resource="sqlmapext/SplittingKeyExtDAO.xml" />
+        <mapper resource="sqlmapext/DepotsTableRulesExtDAO.xml" />
+    </mappers>
+</configuration>

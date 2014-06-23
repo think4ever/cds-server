@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wangyin.cds.service.dal.datainterface.DataSourceDAO">
+    <cache/>
+    <resultMap type="DataSourceDO" id="dataSourceResultMap">
+        <id property="id" column="data_source_id"/>
+        <result property="name" column="name"/>
+        <result property="minConnections" column="min_connections"/>
+        <result property="maxConnections" column="max_connections"/>
+        <result property="userName" column="user_name"/>
+        <result property="passWord" column="pass_word"/>
+        <result property="checkoutTimeoutMilliSec" column="checkout_timeout_milli_sec"/>
+        <result property="idleTimeoutSec" column="idle_timeout_sec"/>
+        <result property="checkStatement" column="check_statement"/>
+        <result property="maxStatements" column="max_statements"/>
+        <result property="maxPreStatements" column="max_pre_statements"/>
+        <result property="printSql" column="print_sql"/>
+        <result property="verbose" column="verbose"/>
+        <result property="connectionInfo" column="connection_info"/>
+        <result property="createBy" column="create_by"/>
+        <result property="creationDate" column="creation_date"/>
+        <result property="modifiedBy" column="modified_by"/>
+        <result property="modificationDate" column="modification_date"/>
+        <result property="deleteStatus" column="delete_status"/>
+    </resultMap>
+    <!-- 获取状态为"未删除"的所有数据源信息 -->
+    <select id="getAllDataSourceList" parameterType="com.wangyin.cds.service.util.Paginator" resultType="DataSourceDO"
+            resultMap="dataSourceResultMap">
+        select * from datasource where delete_status='false' order by data_source_id desc
+    </select>
+    
+    <!-- 获取状态为"未删除"的所有数据库源信息 -->
+    <select id="getDataSourceList" parameterType="com.wangyin.cds.service.util.Paginator" resultType="DataSourceDO"
+            resultMap="dataSourceResultMap">
+        select * from datasource where delete_status='false' order by data_source_id desc LIMIT #{beginIndex},#{itemsPerPage}
+    </select>
+    <!-- 获取状态为"未删除"的所有数据库集群信息总数 -->
+    <select id="getDataSourceListCount" resultType="Integer">
+        select count(data_source_id) from datasource where delete_status='false'
+    </select>
+    <!-- 根据组合条件查询数据库集群信息-->
+    <select id="getDataSourceAndClass" parameterType="map" resultType="DataSourceDO" resultMap="dataSourceResultMap">
+        select * from datasource
+        <where>
+            delete_status='false'
+            <if test="dataSourceVO.name!=null and dataSourceVO.name!=''">and name like CONCAT(CONCAT('%', #{dataSourceVO.name}),'%')</if>
+            <if test="dataSourceVO.id!=null and dataSourceVO.id!=''">and data_source_id=#{dataSourceVO.id}</if>
+            <if test="dataSourceVO.userName!=null and dataSourceVO.userName!=''">and user_name like CONCAT(CONCAT('%', #{dataSourceVO.userName}),'%')</if>
+        </where>
+        order by data_source_id desc LIMIT #{beginIndex},#{itemsPerPage}
+    </select>
+    <!-- 根据组合条件查询数据库集群信息总数-->
+    <select id="getDataSourceAndClassCount" parameterType="map" resultType="Integer">
+        select count(data_source_id) from datasource
+        <where>
+            delete_status='false'
+            <if test="dataSourceVO.name!=null and dataSourceVO.name!=''">and name like CONCAT(CONCAT('%', #{dataSourceVO.name}),'%')</if>
+            <if test="dataSourceVO.id!=null and dataSourceVO.id!=''">and data_source_id=#{dataSourceVO.id}</if>
+            <if test="dataSourceVO.userName!=null and dataSourceVO.userName!=''">and user_name like CONCAT(CONCAT('%', #{dataSourceVO.userName}),'%')</if>
+        </where>
+    </select>
+    <!-- 根据id查询数据库集群信息-->
+    <select id="getDataSource" parameterType="String" resultType="DataSourceDO" resultMap="dataSourceResultMap">
+        select * from datasource where data_source_id=#{id}
+    </select>
+    <!-- 根据数据源名称获取数据源信息(若有重复多条,取最后一条)-->
+    <select id="getDataSourceByName" parameterType="String" resultType="DataSourceDO" resultMap="dataSourceResultMap">
+        select * from datasource where name=#{name} order by data_source_id desc LIMIT 0,1
+    </select>
+    <!-- 更新数据库集群信息 -->
+    <update id="updateDataSource" parameterType="DataSourceDO">
+        UPDATE datasource
+        <set>
+            <if test="name!=null and name!=''">name=#{name},</if>
+            <if test="modifiedBy!=null and modifiedBy!=''">modified_by=#{modifiedBy},</if>
+            <if test="minConnections!=null and minConnections!=''">min_connections=#{minConnections},</if>
+            <if test="maxConnections!=null and maxConnections!=''">max_connections=#{maxConnections},</if>
+            <if test="url!=null and url!=''">url=#{url},</if>
+            <if test="driver!=null and driver!=''">driver=#{driver},</if>
+            <if test="userName!=null and userName!=''">user_name=#{userName},</if>
+            <if test="passWord!=null and passWord!=''">pass_word=#{passWord},</if>
+            <if test="checkoutTimeoutMilliSec!=null and checkoutTimeoutMilliSec!=''">checkout_timeout_milli_sec=#{checkoutTimeoutMilliSec},</if>
+            <if test="idleTimeoutSec!=null and idleTimeoutSec!=''">idle_timeout_sec=#{idleTimeoutSec},</if>
+            <if test="checkStatement!=null and checkStatement!=''">check_statement=#{checkStatement},</if>
+            <if test="maxStatements!=null and maxStatements!=''">max_statements=#{maxStatements},</if>
+            <if test="maxPreStatements!=null and maxPreStatements!=''">max_pre_statements=#{maxPreStatements},</if>
+            <if test="printSql!=null and printSql!=''">print_sql=#{printSql},</if>
+            <if test="verbose!=null and verbose!=''">verbose=#{verbose},</if>
+            <if test="connectionInfo!=null and connectionInfo!=''">connection_info=#{modifiedBy},</if>
+            modification_date=now()
+        </set>
+        <where>
+            data_source_id=#{id}
+        </where>
+    </update>
+    <!-- 删除数据库集群信息 -->
+    <update id="deleteDataSource" parameterType="String">
+        UPDATE datasource set delete_status='true',modified_by=#{modifiedBy},modification_date=now() where data_source_id=#{id}
+    </update>
+    <!-- 插入数据库集群信息 -->
+    <insert id="insertDataSource" parameterType="DataSourceDO" useGeneratedKeys="true">
+        INSERT INTO datasource
+        (`name`,
+        `min_connections`,
+        `max_connections`,
+        `url`,
+        `driver`,
+        `user_name`,
+        `pass_word`,
+        <if test="checkoutTimeoutMilliSec!=null and checkoutTimeoutMilliSec!=''">`checkout_timeout_milli_sec`,</if>
+        `idle_timeout_sec`,
+        `check_statement`,
+        <if test="maxStatements!=null and maxStatements!=''">`max_statements`,</if>
+        <if test="maxPreStatements!=null and maxPreStatements!=''">`max_pre_statements`,</if>
+        `print_sql`,
+        `verbose`,
+        `connection_info`,
+        `create_by`,
+        `modified_by`)
+        VALUES
+        (#{name},
+        #{minConnections},
+        #{maxConnections},
+        #{url},
+        #{driver},
+        #{userName},
+        #{passWord},
+        <if test="checkoutTimeoutMilliSec!=null and checkoutTimeoutMilliSec!=''"> #{checkoutTimeoutMilliSec},</if>
+        #{idleTimeoutSec},
+        #{checkStatement},
+        <if test="maxStatements!=null and maxStatements!=''"> #{maxStatements},</if>
+        <if test="maxPreStatements!=null and maxPreStatements!=''"> #{maxPreStatements},</if>
+        #{printSql},
+        #{verbose},
+        #{connectionInfo},
+        #{createBy},
+        #{modifiedBy})
+    </insert>
+</mapper>

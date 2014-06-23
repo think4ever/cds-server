@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wangyin.cds.service.dal.datainterface.DepotsTableRulesDAO">
+    <cache/>
+    <resultMap type="DepotsTableRulesDO" id="depotsTableRulesResultMap">
+        <id property="id" column="depots_table_rules_id"/>
+        <result property="ruleType" column="rule_type"/>
+        <result property="dbGroupId" column="db_group_id"/>
+        <result property="tableSuffix" column="table_suffix"/>
+        <result property="upperLimit" column="upper_limit"/>
+        <result property="lowerLimit" column="lower_limit"/>
+        <result property="hashValue" column="hash_value"/>
+        <result property="createBy" column="create_by"/>
+        <result property="creationDate" column="creation_date"/>
+        <result property="modifiedBy" column="modified_by"/>
+        <result property="modificationDate" column="modification_date"/>
+        <result property="deleteStatus" column="delete_status"/>
+    </resultMap>
+    <!-- 获取状态为"未删除"的所有分库分表规则,无分页 -->
+    <select id="getDepotsTableRulesListNoPaginator" resultType="DepotsTableRulesDO"
+            resultMap="depotsTableRulesResultMap">
+        select * from depotstablerules where delete_status='false' order by depots_table_rules_id desc
+    </select>
+    <!-- 获取状态为"未删除"的所有分库分表规则 -->
+    <select id="getDepotsTableRulesList" parameterType="com.wangyin.wycds.web.util.Paginator"
+            resultType="DepotsTableRulesDO"
+            resultMap="depotsTableRulesResultMap">
+        select * from depotstablerules where delete_status='false' order by depots_table_rules_id desc LIMIT
+        #{beginIndex},#{itemsPerPage}
+    </select>
+    <!-- 获取状态为"未删除"的所有分库分表规则总数 -->
+    <select id="getDepotsTableRulesListCount" resultType="Integer">
+        select count(depots_table_rules_id) from depotstablerules where delete_status='false'
+    </select>
+    <!-- 根据组合条件查询分库分表规则-->
+    <select id="getDepotsTableRulesAndClass" parameterType="map" resultType="DepotsTableRulesDO"
+            resultMap="depotsTableRulesResultMap">
+        select * from depotstablerules
+        <where>
+            delete_status='false'
+            <if test="depotsTableRulesVO.dbGroupId!=null and depotsTableRulesVO.dbGroupId!=''">and
+                db_group_id=#{dbGroupId.splittingKeyId}
+            </if>
+        </where>
+        order by depots_table_rules_id desc LIMIT #{beginIndex},#{itemsPerPage}
+    </select>
+    <!-- 根据组合条件查询分库分表规则总数-->
+    <select id="getDepotsTableRulesAndClassCount" parameterType="map" resultType="Integer">
+        select count(depots_table_rules_id) from depotstablerules
+        <where>
+            delete_status='false'
+            <if test="depotsTableRulesVO.dbGroupId!=null and depotsTableRulesVO.dbGroupId!=''">and
+                db_group_id=#{depotsTableRulesVO.dbGroupId}
+            </if>
+        </where>
+    </select>
+    <!-- 根据id查询分库分表规则-->
+    <select id="getDepotsTableRules" parameterType="String" resultType="DepotsTableRulesDO"
+            resultMap="depotsTableRulesResultMap">
+        select * from depotstablerules where depots_table_rules_id=#{id}
+    </select>
+    <!-- 更新分库分表规则 -->
+    <update id="updateDepotsTableRules" parameterType="DepotsTableRulesDO">
+        UPDATE depotstablerules
+        <set>
+            <if test="ruleType!=null and ruleType!=''">rule_type=#{ruleType},</if>
+            <if test="dbGroupId!=null and dbGroupId!=''">db_group_id=#{dbGroupId},</if>
+            <if test="tableSuffix!=null and tableSuffix!=''">table_suffix=#{tableSuffix},</if>
+            <if test="upperLimit!=null and upperLimit!=''">upper_limit=#{upperLimit},</if>
+            <if test="lowerLimit!=null and lowerLimit!=''">lower_limit=#{lowerLimit},</if>
+            <if test="hashValue!=null and hashValue!=''">hash_value=#{hashValue},</if>
+            <if test="modifiedBy!=null and modifiedBy!=''">modified_by=#{modifiedBy},</if>
+            modification_date=now()
+        </set>
+        <where>
+            depots_table_rules_id=#{id}
+        </where>
+    </update>
+    <!-- 删除分库分表规则 -->
+    <update id="deleteDepotsTableRules" parameterType="String">
+        UPDATE depotstablerules set delete_status='true',modified_by=#{modifiedBy},modification_date=now() where
+        depots_table_rules_id=#{id}
+    </update>
+    <!-- 插入分库分表规则 -->
+    <insert id="insertDepotsTableRules" parameterType="DepotsTableRulesDO" useGeneratedKeys="true">
+        INSERT INTO depotstablerules
+        (`rule_type`,
+        `db_group_id`,
+        `table_suffix`,
+        `upper_limit`,
+        `lower_limit`,
+        `hash_value`,
+        `create_by`,
+        `modified_By`)
+        VALUES
+        (#{ruleType},
+        #{dbGroupId},
+        #{tableSuffix},
+        #{upperLimit},
+        #{lowerLimit},
+        #{hashValue},
+        #{createBy},
+        #{modifiedBy});
+    </insert>
+</mapper>

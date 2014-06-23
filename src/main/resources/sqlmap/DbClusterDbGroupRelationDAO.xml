@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wangyin.cds.service.dal.datainterface.DbClusterDbGroupRelationDAO">
+    <cache/>
+    <resultMap type="DbClusterDbGroupRelationDO" id="dbClusterResultMap">
+        <id property="id" column="r_db_cluster_db_group_id"/>
+        <result property="dbClusterId" column="db_cluster_id"/>
+        <result property="dbGroupId" column="db_group_id"/>
+        <result property="groupType" column="group_type"/>
+        <result property="groupName" column="group_name"/>
+        <result property="createBy" column="create_by"/>
+        <result property="creationDate" column="creation_date"/>
+        <result property="modifiedBy" column="modified_by"/>
+        <result property="modificationDate" column="modification_date"/>
+        <result property="deleteStatus" column="delete_status"/>
+    </resultMap>
+    <!-- 获取数据库集下所有数据群组信息 -->
+    <select id="getDbClusterDbGroupRelationList" parameterType="String" resultType="DbClusterDbGroupRelationDO"
+            resultMap="dbClusterResultMap">
+        select * from dbgroup g, rdbclusterdbgroup c where c.db_group_id=g.db_group_id and db_cluster_id=#{dbClusterId}
+        order by r_db_cluster_db_group_id
+    </select>
+    <!-- 删除集群和群组关联关系 -->
+    <update id="deleteDbClusterDbGroupRelation" parameterType="String">
+        delete from rdbclusterdbgroup where r_db_cluster_db_group_id in
+        <foreach collection="list" index="index" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+    <!-- 插入数据库集群和群组关系 -->
+    <insert id="insertDbClusterDbGroupRelation" parameterType="DbClusterDbGroupRelationDO" useGeneratedKeys="true">
+        INSERT INTO rdbclusterdbgroup
+        (`db_cluster_id`,
+        `db_group_id`,
+        `group_type`)
+        VALUES
+        (#{dbClusterId},
+        #{dbGroupId},
+        #{groupType});
+    </insert>
+</mapper>

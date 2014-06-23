@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wangyin.cds.service.dal.ext.datainterface.DbInfoExtDAO">
+    <cache/>
+    <resultMap type="DbInfoExt" id="dbInfoExtResultMap">
+        <id property="id" column="db_info_id"/>
+        <result property="ip" column="ip"/>
+        <result property="port" column="port"/>
+        <result property="dbName" column="db_name"/>
+        <result property="serverId" column="db_server_id"/>
+        <result property="dbType" column="db_type"/>
+        <result property="dbStatus" column="db_status"/>
+        <result property="masterOrSlave" column="master_or_slave"/>
+        <result property="createBy" column="create_by"/>
+        <result property="creationDate" column="creation_date"/>
+        <result property="modifiedBy" column="modified_by"/>
+        <result property="modificationDate" column="modification_date"/>
+        <result property="deleteStatus" column="delete_status"/>
+    </resultMap>
+    
+    <!-- 根据群组名称查询数据库扩展信息列表 -->
+    <select id="getDbInfoListByGroupName" parameterType="java.lang.String" resultType="DbInfoExt" resultMap="dbInfoExtResultMap">
+	    SELECT d.*,r.master_or_slave FROM dbinfo d,rdbinfodbgroup r
+        <where>
+            d.delete_status='false'
+            <if test="_parameter!=null and _parameter!=''">
+            AND d.db_info_id = r.db_info_id and r.db_group_id IN
+            	(SELECT g.db_group_id FROM dbgroup g WHERE g.group_name = #{_parameter})
+            </if>
+        </where>
+        ORDER BY d.db_info_id desc
+    </select>
+    
+    <!-- 根据群组ID查询数据库扩展信息列表 -->
+    <select id="getDbInfoListByGroupId" parameterType="int" resultType="DbInfoExt" resultMap="dbInfoExtResultMap">
+	    SELECT d.*,r.master_or_slave FROM dbinfo d,rdbinfodbgroup r
+        <where>
+            d.delete_status='false'
+            AND d.db_info_id = r.db_info_id and r.db_group_id = #{_parameter}
+        </where>
+        ORDER BY d.db_info_id desc
+    </select>
+    
+    <!-- 根据主备类型查询所有数据库扩展信息列表 -->
+    <select id="getDbInfoListByType" parameterType="java.lang.String" resultType="DbInfoExt" resultMap="dbInfoExtResultMap">
+	    SELECT d.*,r.master_or_slave FROM dbinfo d,rdbinfodbgroup r
+        <where>
+            d.delete_status='false'
+            AND d.db_info_id = r.db_info_id and r.master_or_slave = #{type}
+        </where>
+        ORDER BY d.db_info_id desc
+    </select>
+    
+</mapper>

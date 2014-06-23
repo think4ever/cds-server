@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wangyin.cds.service.dal.datainterface.DbInfoDAO">
+    <cache/>
+    <resultMap type="DbInfoDO" id="dbInfoResultMap">
+        <id property="id" column="db_info_id"/>
+        <result property="ip" column="ip"/>
+        <result property="port" column="port"/>
+        <result property="dbName" column="db_name"/>
+        <result property="serverId" column="db_server_id"/>
+        <result property="dbType" column="db_type"/>
+        <result property="dbStatus" column="db_status"/>
+        <result property="createBy" column="create_by"/>
+        <result property="creationDate" column="creation_date"/>
+        <result property="modifiedBy" column="modified_by"/>
+        <result property="modificationDate" column="modification_date"/>
+        <result property="deleteStatus" column="delete_status"/>
+    </resultMap>
+    <!-- 获取状态为"未删除"的所有数据库信息 -->
+    <select id="getDbInfoList" parameterType="com.wangyin.cds.service.util.Paginator" resultType="DbInfoDO"
+            resultMap="dbInfoResultMap">
+        select * from dbinfo where delete_status='false' order by db_info_id desc LIMIT #{beginIndex},#{itemsPerPage}
+    </select>
+    <!-- 获取状态为"未删除"的所有数据库信息总数 -->
+    <select id="getDbInfoListCount" resultType="Integer">
+        select count(db_info_id) from dbinfo where delete_status='false'
+    </select>
+    <!-- 根据组合条件查询数据库信息-->
+    <select id="getDbInfoAndClass" parameterType="map" resultType="DbInfoDO" resultMap="dbInfoResultMap">
+        select * from dbinfo
+        <where>
+            delete_status='false'
+            <if test="dbInfoVO.ip!=null and dbInfoVO.ip!=''">and ip=#{dbInfoVO.ip}</if>
+            <if test="dbInfoVO.port!=null and dbInfoVO.port!=''">and port=#{dbInfoVO.port}</if>
+            <if test="dbInfoVO.dbName!=null and dbInfoVO.dbName!=''">and db_name like CONCAT(CONCAT('%', #{dbInfoVO.dbName}),'%')</if>
+            <if test="dbInfoVO.dbType!=null and dbInfoVO.dbType!=''">and db_type=#{dbInfoVO.dbType}</if>
+            <if test="dbInfoVO.dbStatus!=null and dbInfoVO.dbStatus!=''">and db_status=#{dbInfoVO.dbStatus}</if>
+        </where>
+        order by db_info_id desc LIMIT #{beginIndex},#{itemsPerPage}
+    </select>
+    <!-- 根据组合条件查询数据库信息总数-->
+    <select id="getDbInfoAndClassCount" parameterType="map" resultType="Integer">
+        select count(db_info_id) from dbinfo
+        <where>
+            delete_status='false'
+            <if test="dbInfoVO.ip!=null and dbInfoVO.ip!=''">and ip=#{dbInfoVO.ip}</if>
+            <if test="dbInfoVO.port!=null and dbInfoVO.port!=''">and port=#{dbInfoVO.port}</if>
+            <if test="dbInfoVO.dbName!=null and dbInfoVO.dbName!=''">and db_name like CONCAT(CONCAT('%', #{dbInfoVO.dbName}),'%')</if>
+            <if test="dbInfoVO.dbType!=null and dbInfoVO.dbType!=''">and db_type=#{dbInfoVO.dbType}</if>
+            <if test="dbInfoVO.dbStatus!=null and dbInfoVO.dbStatus!=''">and db_status=#{dbInfoVO.dbStatus}</if>
+        </where>
+    </select>
+    <!-- 根据组合条件查询数据库信息,无分页-->
+    <select id="getDbInfoAndClassNoPaginator" parameterType="map" resultType="DbInfoDO" resultMap="dbInfoResultMap">
+        select * from dbinfo
+        <where>
+            delete_status='false'
+            <if test="dbInfoVO.ip!=null and dbInfoVO.ip!=''">and ip=#{dbInfoVO.ip}</if>
+            <if test="dbInfoVO.dbName!=null and dbInfoVO.dbName!=''">and db_name like CONCAT(CONCAT('%', #{dbInfoVO.dbName}),'%')</if>
+            <if test="dbInfoVO.id!=null and dbInfoVO.id!=''">and db_info_id=#{dbInfoVO.id}</if>
+            and db_info_id not in(select db_info_id from rdbinfodbgroup c where c.db_group_id=#{groupId})
+        </where>
+        order by db_info_id desc
+    </select>
+    <!-- 根据id查询数据库信息-->
+    <select id="getDbInfo" parameterType="String" resultType="DbInfoDO" resultMap="dbInfoResultMap">
+        select * from dbinfo where db_info_id=#{id}
+    </select>
+    <!-- 根据serverId查询数据库信息-->
+    <select id="getDbInfoByServerId" parameterType="long" resultType="DbInfoDO" resultMap="dbInfoResultMap">
+        select * from dbinfo where db_server_id=#{serverId} and delete_status='false'
+    </select>
+    <!-- 更新数据库信息 -->
+    <update id="updateDbInfo" parameterType="DbInfoDO">
+        UPDATE dbinfo
+        <set>
+            <if test="ip!=null and ip!=''">ip=#{ip},</if>
+            <if test="port!=null and port!=''">port=#{port},</if>
+            <if test="dbName!=null and dbName!=''">db_name=#{dbName},</if>
+            <if test="dbType!=null and dbType!=''">db_type=#{dbType},</if>
+            <if test="dbStatus!=null and dbStatus!=''">db_status=#{dbStatus},</if>
+            <if test="modifiedBy!=null and modifiedBy!=''">modified_by=#{modifiedBy},</if>
+            modification_date=now()
+        </set>
+        <where>
+            db_info_id=#{id}
+        </where>
+    </update>
+    <!-- 删除数据库信息 -->
+    <update id="deleteDbInfo" parameterType="String">
+        UPDATE dbinfo set delete_status='true',modified_by=#{modifiedBy},modification_date=now() where db_info_id=#{id}
+    </update>
+    <!-- 插入数据库信息 -->
+    <insert id="insertDbInfo" parameterType="DbInfoDO" useGeneratedKeys="true">
+        INSERT INTO dbinfo
+        (`ip`,
+        `port`,
+        `db_name`,
+        `db_type`,
+        `db_status`,
+        `create_by`,
+        `modified_By`)
+        VALUES
+        (#{ip},
+        #{port},
+        #{dbName},
+        #{dbType},
+        #{dbStatus},
+        #{createBy},
+        #{modifiedBy});
+    </insert>
+</mapper>

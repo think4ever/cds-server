@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wangyin.cds.service.dal.ext.datainterface.DbGroupExtDAO">
+    <cache/>
+    <resultMap type="DbGroupExt" id="dbGroupExtResultMap">
+        <id property="id" column="db_group_id"/>
+        <result property="groupName" column="group_name"/>
+        <result property="groupType" column="group_type"/>
+        <result property="createBy" column="create_by"/>
+        <result property="creationDate" column="creation_date"/>
+        <result property="modifiedBy" column="modified_by"/>
+        <result property="modificationDate" column="modification_date"/>
+        <result property="deleteStatus" column="delete_status"/>
+    </resultMap>
+
+    <!-- 根据数据库簇名称查询对应的群组列表-->
+    <select id="getDbGroupListByClusterName" parameterType="java.lang.String" resultType="DbGroupExt" resultMap="dbGroupExtResultMap">
+	    SELECT g.*,r.group_type FROM dbgroup g, rdbclusterdbgroup r
+        <where>
+            g.delete_status='false'
+            <if test="_parameter!=null and _parameter!=''">
+            AND g.db_group_id = r.db_group_id AND r.db_cluster_id IN
+            	(SELECT c.db_cluster_id FROM dbcluster c WHERE c.cluster_name = #{_parameter})
+            </if>
+        </where>
+        ORDER BY g.db_group_id desc
+    </select>
+
+</mapper>

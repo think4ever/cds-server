@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wangyin.cds.service.dal.datainterface.ColumnInfoDAO">
+    <cache/>
+    <resultMap type="ColumnInfoDO" id="columnInfoResultMap">
+        <id property="id" column="column_info_id"/>
+        <result property="splittingKeyId" column="splitting_key_id"/>
+        <result property="table" column="table_name"/>
+        <result property="column" column="column_name"/>
+        <result property="createBy" column="create_by"/>
+        <result property="creationDate" column="creation_date"/>
+        <result property="modifiedBy" column="modified_by"/>
+        <result property="modificationDate" column="modification_date"/>
+        <result property="deleteStatus" column="delete_status"/>
+    </resultMap>
+    <!-- 获取状态为"未删除"的所有数据库信息 -->
+    <select id="getColumnInfoList" parameterType="com.wangyin.cds.service.util.Paginator" resultType="ColumnInfoDO"
+            resultMap="columnInfoResultMap">
+        select * from columninfo where delete_status='false' order by column_info_id desc LIMIT #{beginIndex},#{itemsPerPage}
+    </select>
+    <!-- 获取状态为"未删除"的所有数据库信息总数 -->
+    <select id="getColumnInfoListCount" resultType="Integer">
+        select count(column_info_id) from columninfo where delete_status='false'
+    </select>
+    <!-- 根据组合条件查询数据库信息-->
+    <select id="getColumnInfoAndClass" parameterType="map" resultType="ColumnInfoDO" resultMap="columnInfoResultMap">
+        select * from columninfo
+        <where>
+            delete_status='false'
+            <if test="columnInfoVO.splittingKeyId!=null and columnInfoVO.splittingKeyId!=''">and splitting_key_id=#{columnInfoVO.splittingKeyId}</if>
+            <if test="columnInfoVO.table!=null and columnInfoVO.table!=''">and table like CONCAT(CONCAT('%', #{columnInfoVO.table}),'%')</if>
+            <if test="columnInfoVO.column!=null and columnInfoVO.column!=''">and column like CONCAT(CONCAT('%', #{columnInfoVO.column}),'%')</if>
+        </where>
+        order by column_info_id desc LIMIT #{beginIndex},#{itemsPerPage}
+    </select>
+    <!-- 根据组合条件查询数据库信息总数-->
+    <select id="getColumnInfoAndClassCount" parameterType="map" resultType="Integer">
+        select count(column_info_id) from columninfo
+        <where>
+            delete_status='false'
+            <if test="columnInfoVO.splittingKeyId!=null and columnInfoVO.splittingKeyId!=''">and splitting_key_id=#{columnInfoVO.splittingKeyId}</if>
+            <if test="columnInfoVO.table!=null and columnInfoVO.table!=''">and table like CONCAT(CONCAT('%', #{columnInfoVO.table}),'%')</if>
+            <if test="columnInfoVO.column!=null and columnInfoVO.column!=''">and column like CONCAT(CONCAT('%', #{columnInfoVO.column}),'%')</if>
+        </where>
+    </select>
+    <!-- 根据id查询数据库信息-->
+    <select id="getColumnInfo" parameterType="String" resultType="ColumnInfoDO" resultMap="columnInfoResultMap">
+        select * from columninfo where column_info_id=#{id}
+    </select>
+    <!-- 更新数据库信息 -->
+    <update id="updateColumnInfo" parameterType="ColumnInfoDO">
+        UPDATE columninfo
+        <set>
+            <if test="table!=null and table!=''">table=#{table},</if>
+            <if test="column!=null and column!=''">column=#{column},</if>
+            <if test="modifiedBy!=null and modifiedBy!=''">modified_by=#{modifiedBy},</if>
+            modification_date=now()
+        </set>
+        <where>
+            column_info_id=#{id}
+        </where>
+    </update>
+    <!-- 删除数据库信息 -->
+    <update id="deleteColumnInfo" parameterType="String">
+        UPDATE columninfo set delete_status='true',modified_by=#{modifiedBy},modification_date=now() where column_info_id=#{id}
+    </update>
+    <!-- 插入数据库信息 -->
+    <insert id="insertColumnInfo" parameterType="ColumnInfoDO" useGeneratedKeys="true">
+        INSERT INTO columninfo
+        (`splitting_key_id`,
+        `table`,
+        `column`,
+        `create_by`,
+        `modified_By`)
+        VALUES
+        (#{splittingKeyId},
+        #{table},
+        #{column},
+        #{createBy},
+        #{modifiedBy});
+    </insert>
+</mapper>

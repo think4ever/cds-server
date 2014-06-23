@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wangyin.cds.service.dal.datainterface.DbGroupDAO">
+    <cache/>
+    <resultMap type="DbGroupDO" id="dbGroupResultMap">
+        <id property="id" column="db_group_id"/>
+        <result property="groupName" column="group_name"/>
+        <result property="createBy" column="create_by"/>
+        <result property="creationDate" column="creation_date"/>
+        <result property="modifiedBy" column="modified_by"/>
+        <result property="modificationDate" column="modification_date"/>
+        <result property="deleteStatus" column="delete_status"/>
+    </resultMap>
+    <!-- 获取状态为"未删除"的所有数据库群组信息 -->
+    <select id="getDbGroupAllList"  resultType="DbGroupDO" resultMap="dbGroupResultMap">
+        select * from dbgroup where delete_status='false' order by db_group_id desc
+    </select>
+    <!-- 获取状态为"未删除"的所有数据库群组信息,带分页 -->
+    <select id="getDbGroupList" parameterType="com.wangyin.cds.service.util.Paginator" resultType="DbGroupDO"
+            resultMap="dbGroupResultMap">
+        select * from dbgroup where delete_status='false' order by db_group_id desc LIMIT #{beginIndex},#{itemsPerPage}
+    </select>
+    <!-- 获取状态为"未删除"的所有数据库群组信息总数 -->
+    <select id="getDbGroupListCount" resultType="Integer">
+        select count(db_group_id) from dbgroup where delete_status='false'
+    </select>
+    <!-- 根据组合条件查询数据库群组信息,无分页-->
+    <select id="getDbGroupAndClassNoPaginator" parameterType="map" resultType="DbGroupDO" resultMap="dbGroupResultMap">
+        select * from dbgroup
+        <where>
+            delete_status='false'
+            <if test="dbGroupVO.groupName!=null and dbGroupVO.groupName!=''">and group_name like CONCAT(CONCAT('%', #{dbGroupVO.groupName}),'%')</if>
+            <if test="dbGroupVO.id!=null and dbGroupVO.id!=''">and db_group_id=#{dbGroupVO.id}</if>
+            and db_group_id not in(select db_group_id from rdbclusterdbgroup c where c.db_cluster_id=#{clusterId})
+        </where>
+        order by db_group_id desc
+    </select>
+    <!-- 根据组合条件查询数据库群组信息-->
+    <select id="getDbGroupAndClass" parameterType="map" resultType="DbGroupDO" resultMap="dbGroupResultMap">
+        select * from dbgroup
+        <where>
+            delete_status='false'
+            <if test="dbGroupVO.groupName!=null and dbGroupVO.groupName!=''">and group_name like CONCAT(CONCAT('%', #{dbGroupVO.groupName}),'%')</if>
+        </where>
+        order by db_group_id desc LIMIT #{beginIndex},#{itemsPerPage}
+    </select>
+    <!-- 根据组合条件查询数据库群组信息总数-->
+    <select id="getDbGroupAndClassCount" parameterType="map" resultType="Integer">
+        select count(db_group_id) from dbgroup
+        <where>
+            delete_status='false'
+            <if test="dbGroupVO.groupName!=null and dbGroupVO.groupName!=''">and group_name like CONCAT(CONCAT('%', #{dbGroupVO.groupName}),'%')</if>
+        </where>
+    </select>
+    <!-- 根据id查询数据库群组信息-->
+    <select id="getDbGroup" parameterType="String" resultType="DbGroupDO" resultMap="dbGroupResultMap">
+        select * from dbgroup where db_group_id=#{id}
+    </select>
+    <!-- 更新数据库群组信息 -->
+    <update id="updateDbGroup" parameterType="DbGroupDO">
+        UPDATE dbgroup
+        <set>
+            <if test="groupName!=null and groupName!=''">group_name=#{groupName},</if>
+            <if test="modifiedBy!=null and modifiedBy!=''">modified_by=#{modifiedBy},</if>
+            modification_date=now()
+        </set>
+        <where>
+            db_group_id=#{id}
+        </where>
+    </update>
+    <!-- 删除数据库群组信息 -->
+    <update id="deleteDbGroup" parameterType="String">
+        UPDATE dbgroup set delete_status='true',modified_by=#{modifiedBy},modification_date=now() where db_group_id=#{id}
+    </update>
+    <!-- 插入数据库群组信息 -->
+    <insert id="insertDbGroup" parameterType="DbGroupDO" useGeneratedKeys="true">
+        INSERT INTO dbgroup
+        (`group_name`,
+        `create_by`,
+        `modified_By`)
+        VALUES
+        (#{groupName},
+        #{createBy},
+        #{modifiedBy});
+    </insert>
+    
+    <!-- 根据数据库ID查询对应的群组列表-->
+    <select id="getDbGroupListByDbinfoId" parameterType="long" resultType="DbGroupDO" resultMap="dbGroupResultMap">
+	    SELECT g.* FROM dbgroup g, rdbinfodbgroup r 
+	    WHERE g.delete_status='false'
+            AND g.db_group_id = r.db_group_id 
+            AND  r.db_info_id= (SELECT i.db_info_id FROM dbinfo i WHERE i.db_server_id = #{serverId})
+        ORDER BY g.db_group_id desc
+    </select>
+</mapper>

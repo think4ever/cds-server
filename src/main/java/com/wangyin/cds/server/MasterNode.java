@@ -23,6 +23,8 @@ public class MasterNode extends ServerNode {
 	private MasterInfo description;
 	public MasterNode(){
 		useInternalModule(Predefined.MODULE_ADMIN);
+		useInternalModule(Predefined.MODULE_HTTP_POLL);
+		useInternalModule(Predefined.MODULE_IDX_SYNC);
 	}
 	
 	

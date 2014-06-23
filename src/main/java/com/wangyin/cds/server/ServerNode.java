@@ -2,6 +2,7 @@ package com.wangyin.cds.server;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -17,30 +18,30 @@ import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import com.wangyin.cds.server.container.NettyContainerInitializer;
+import com.wangyin.cds.server.httppoll.CdsPollHttpServerInitializer;
 import com.wangyin.cds.server.modules.INodeModule;
 import com.wangyin.cds.server.modules.ServerModule;
-import com.wangyin.cds.server.persistence.PersistenceManager;
 
 /**
  * 抽象的服务器节点，用作Master或者Slave
  * 
- * @author david wy
+ * @author david
  * 
  */
 public abstract class ServerNode {
-	private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory
-			.getLogger(ServerNode.class);
-	private static final String PROP_HTTP_SERVER = "http_server";
-	private static final Map<String, String> INTERNAL_MODULES = new HashMap<String, String>();
-	static {
-		INTERNAL_MODULES.put(Predefined.MODULE_ADMIN,
-				"com.wangyin.cds.server.modules.admin.AdminModule");
-	}
+    private static final org.slf4j.Logger    logger           = org.slf4j.LoggerFactory.getLogger(ServerNode.class);
+    private static final String              PROP_HTTP_SERVER = "http_server";
+    private static final Map<String, String> INTERNAL_MODULES = new HashMap<String, String>();
+    static {
+        INTERNAL_MODULES.put(Predefined.MODULE_ADMIN, "com.wangyin.cds.server.modules.admin.AdminModule");
+        INTERNAL_MODULES.put(Predefined.MODULE_HTTP_POLL, "com.wangyin.cds.server.modules.HttpPollModule");
+        //注册反向索引同步服务
+        INTERNAL_MODULES.put(Predefined.MODULE_HTTP_POLL, "com.wangyin.cds.server.modules.iis.InvertedIndexSynchorizerModule");
+    }
 	protected String home;
 	protected Map<String, INodeModule> modules = new HashMap<String, INodeModule>();
 	private ExecutorService service;
 	private NettyContainerInitializer httpInitalizer;
-	private PersistenceManager persistenceManager;
 	private final class ServerDescription{
 		EventLoopGroup boss;
 		EventLoopGroup handle;
@@ -60,7 +61,6 @@ public abstract class ServerNode {
 			throws Exception;
 
 	protected void initialize() throws Exception {
-		persistenceManager = new PersistenceManager();
 		service = Executors.newFixedThreadPool(modules.size() + 1);
 		InputStream conf_stream = getConfiguration();
 		if (conf_stream == null) {
@@ -91,6 +91,8 @@ public abstract class ServerNode {
 	     EventLoopGroup workerGroup = new NioEventLoopGroup();
 	     final ServerBootstrap sb = new ServerBootstrap();
 	     sb.group(bossGroup, workerGroup);
+	     
+	     // start http server
 	     service.execute(new Runnable() {
 			public void run() {
 				sb.channel(NioServerSocketChannel.class)
@@ -103,6 +105,7 @@ public abstract class ServerNode {
 				}
 			}
 		});
+        
 	    serverDescription.boss = bossGroup;
 	    serverDescription.handle = workerGroup;
 	}

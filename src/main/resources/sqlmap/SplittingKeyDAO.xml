@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wangyin.cds.service.dal.datainterface.SplittingKeyDAO">
+    <cache/>
+    <resultMap type="SplittingKeyDO" id="splittingKeyResultMap">
+        <id property="id" column="splitting_key_id"/>
+        <result property="splitName" column="split_name"/>
+        <result property="createBy" column="create_by"/>
+        <result property="creationDate" column="creation_date"/>
+        <result property="modifiedBy" column="modified_by"/>
+        <result property="modificationDate" column="modification_date"/>
+        <result property="deleteStatus" column="delete_status"/>
+        <result property="clusterId" column="cluster_id"/>
+    </resultMap>
+    <!-- 获取状态为"未删除"的所有切分键信息,无分页 -->
+    <select id="getSplittingKeyListNoPaginator" parameterType="com.wangyin.cds.service.util.Paginator" resultType="SplittingKeyDO"
+            resultMap="splittingKeyResultMap">
+        select * from splittingkey where delete_status='false' order by splitting_key_id desc
+    </select>
+    <!-- 获取状态为"未删除"的所有切分键信息 -->
+    <select id="getSplittingKeyList" parameterType="com.wangyin.cds.service.util.Paginator" resultType="SplittingKeyDO"
+            resultMap="splittingKeyResultMap">
+        select * from splittingkey where delete_status='false' order by splitting_key_id desc LIMIT #{beginIndex},#{itemsPerPage}
+    </select>
+    <!-- 获取状态为"未删除"的所有切分键信息总数 -->
+    <select id="getSplittingKeyListCount" resultType="Integer">
+        select count(splitting_key_id) from splittingkey where delete_status='false'
+    </select>
+    <!-- 根据组合条件查询切分键信息-->
+    <select id="getSplittingKeyAndClass" parameterType="map" resultType="SplittingKeyDO" resultMap="splittingKeyResultMap">
+        select * from splittingkey
+        <where>
+            delete_status='false'
+            <if test="splittingKeyVO.splitName!=null and splittingKeyVO.splitName!=''">and split_name like CONCAT(CONCAT('%', #{splittingKeyVO.splitName}),'%')</if>
+        </where>
+        order by splitting_key_id desc LIMIT #{beginIndex},#{itemsPerPage}
+    </select>
+    <!-- 根据组合条件查询切分键信息总数-->
+    <select id="getSplittingKeyAndClassCount" parameterType="map" resultType="Integer">
+        select count(splitting_key_id) from splittingkey
+        <where>
+            delete_status='false'
+            <if test="splittingKeyVO.splitName!=null and splittingKeyVO.splitName!=''">and split_name like CONCAT(CONCAT('%', #{splittingKeyVO.splitName}),'%')</if>
+        </where>
+    </select>
+    <!-- 根据id查询切分键信息-->
+    <select id="getSplittingKey" parameterType="String" resultType="SplittingKeyDO" resultMap="splittingKeyResultMap">
+        select * from splittingkey where splitting_key_id=#{id}
+    </select>
+    <!-- 更新切分键信息 -->
+    <update id="updateSplittingKey" parameterType="SplittingKeyDO">
+        UPDATE splittingkey
+        <set>
+            <if test="splitName!=null and splitName!=''">split_name=#{splitName},</if>
+            <if test="modifiedBy!=null and modifiedBy!=''">modified_by=#{modifiedBy},</if>
+            modification_date=now()
+        </set>
+        <where>
+            splitting_key_id=#{id}
+        </where>
+    </update>
+    <!-- 删除切分键信息 -->
+    <update id="deleteSplittingKey" parameterType="String">
+        UPDATE splittingkey set delete_status='true',modified_by=#{modifiedBy},modification_date=now() where splitting_key_id=#{id}
+    </update>
+    <!-- 插入切分键信息 -->
+    <insert id="insertSplittingKey" parameterType="SplittingKeyDO" useGeneratedKeys="true">
+        INSERT INTO splittingkey
+        (`split_name`,
+        `create_by`,
+        `modified_By`)
+        VALUES
+        (#{splitName},
+        #{createBy},
+        #{modifiedBy});
+    </insert>
+</mapper>

@@ -13,11 +13,17 @@ import java.util.Map;
 
 import javax.ws.rs.core.Application;
 
+import org.codehaus.jackson.jaxrs.JacksonJsonProvider;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ContainerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import com.wangyin.cds.server.Predefined;
+import com.wangyin.cds.server.container.sample.FooResource;
+import com.wangyin.cds.service.resource.DbClusterResource;
+import com.wangyin.cds.service.resource.DbGroupResource;
+import com.wangyin.cds.service.resource.DbInfoResource;
+import com.wangyin.cds.service.resource.SplittingKeyResource;
 
 public class NettyContainerInitializer extends
 		ChannelInitializer<SocketChannel> {
@@ -44,8 +50,18 @@ public class NettyContainerInitializer extends
 	private Application initApplcation() {
 		ResourceConfig app = new ResourceConfig();
 		this.configuration.put(PROP_APPLICATION, app);
-		app.packages("com.wangyin.cds.server.container.sample");
-		app.packages("com.wangyin.cds.server.modules.monitor");
+		//app.packages("com.wangyin.cds.server.container.sample");
+		//app.packages("com.wangyin.cds.service.resource");
+		app.register(FooResource.class);
+		
+		//cds-server restful service
+		app.register(SplittingKeyResource.class);
+		app.register(DbInfoResource.class);
+		// added by zy
+		app.register(DbClusterResource.class);
+		app.register(DbGroupResource.class);
+		app.register(JacksonJsonProvider.class);
+		
 		app.register(ObjectMapperProvider.class);
 		app.register(JacksonFeature.class);
 		try {

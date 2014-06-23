@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wangyin.cds.service.dal.ext.datainterface.DepotsTableRulesExtDAO">
+    <cache/>
+    <resultMap type="DepotsTableRulesExt" id="depotsTableRulesExtResultMap">
+        <id property="id" column="depots_table_rules_id"/>
+        <result property="ruleType" column="rule_type"/>
+        <result property="dbGroupId" column="db_group_id"/>
+        <result property="tableSuffix" column="table_suffix"/>
+        <result property="upperLimit" column="upper_limit"/>
+        <result property="lowerLimit" column="lower_limit"/>
+        <result property="hashValue" column="hash_value"/>
+        <result property="createBy" column="create_by"/>
+        <result property="creationDate" column="creation_date"/>
+        <result property="modifiedBy" column="modified_by"/>
+        <result property="modificationDate" column="modification_date"/>
+        <result property="deleteStatus" column="delete_status"/>
+        <association property="dbGroup" resultMap="dbGroupModelResultMap" />
+    </resultMap>
+    
+    <resultMap type="DbGroup" id="dbGroupModelResultMap">
+        <id property="id" column="db_group_id"/>
+        <result property="groupName" column="group_name"/>
+        <result property="createBy" column="create_by"/>
+        <result property="creationDate" column="creation_date"/>
+        <result property="modifiedBy" column="modified_by"/>
+        <result property="modificationDate" column="modification_date"/>
+        <result property="deleteStatus" column="delete_status"/>
+    </resultMap>
+    
+    <!-- 根据id查询分库分表规则-->
+    <select id="getDepotsTableRuleById" parameterType="int" resultType="DepotsTableRulesExt" resultMap="depotsTableRulesExtResultMap">
+        SELECT * FROM depotstablerules r INNER JOIN dbgroup g ON r.db_group_id = g.db_group_id 
+        WHERE r.depots_table_rules_id=1=#{id}  AND r.delete_status = 'false' AND g.delete_status='false'
+    </select>
+    
+    <!-- 根据切分键id查询分库分表规则-->
+    <select id="getDepotsTableRuleBySplitKeyId" parameterType="int" resultType="DepotsTableRulesExt" resultMap="depotsTableRulesExtResultMap">
+        SELECT * FROM depotstablerules r INNER JOIN dbgroup g ON r.db_group_id = g.db_group_id
+        WHERE r.depots_table_rules_id IN (SELECT rd.depots_table_rules_id FROM rrulessplittingkey rd WHERE rd.splitting_key_id = #{id})
+        AND r.delete_status = 'false' AND g.delete_status='false'
+    </select>
+    
+    <!-- 根据切分键名称查询分库分表规则-->
+    <select id="getDepotsTableRuleBySplitName" parameterType="String" resultType="DepotsTableRulesExt" resultMap="depotsTableRulesExtResultMap">
+        SELECT * FROM depotstablerules r INNER JOIN dbgroup g ON r.db_group_id = g.db_group_id
+        WHERE r.depots_table_rules_id 
+        IN (SELECT rd.depots_table_rules_id FROM splittingkey s, rrulessplittingkey rd
+			WHERE rd.splitting_key_id = s.splitting_key_id and s.delete_status = 'false' and s.split_name = #{splitName})
+        AND r.delete_status = 'false' AND g.delete_status='false'
+    </select>
+    
+</mapper>

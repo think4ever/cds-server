@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wangyin.cds.service.dal.ext.datainterface.SplittingKeyExtDAO">
+    <cache/>
+    <resultMap type="SplittingKeyExt" id="splittingKeyExtResultMap">
+        <id property="id" column="splitting_key_id"/>
+        <result property="splitName" column="split_name"/>
+        <result property="createBy" column="create_by"/>
+        <result property="creationDate" column="creation_date"/>
+        <result property="modifiedBy" column="modified_by"/>
+        <result property="modificationDate" column="modification_date"/>
+        <result property="deleteStatus" column="delete_status"/>
+        <collection property="columnInfos" ofType="ColumnInfo" resultMap="columnInfoModelResultMap" />
+    </resultMap>
+    <resultMap type="ColumnInfo" id="columnInfoModelResultMap">
+        <id property="id" column="column_info_id"/>
+        <result property="splittingKeyId" column="splitting_key_id"/>
+        <result property="table" column="table"/>
+        <result property="column" column="column"/>
+        <result property="createBy" column="create_by"/>
+        <result property="creationDate" column="creation_date"/>
+        <result property="modifiedBy" column="modified_by"/>
+        <result property="modificationDate" column="modification_date"/>
+        <result property="deleteStatus" column="delete_status"/>
+    </resultMap>
+    
+    <!-- 获取状态为"未删除"的所有切分键信息,无分页 -->
+    <select id="getAllSplittingKeyList" resultType="SplittingKeyDO" resultMap="splittingKeyExtResultMap">
+    	SELECT * FROM splittingkey s, columninfo c WHERE s.delete_status='false' AND s.splitting_key_id = c.splitting_key_id AND c.delete_status='false' ORDER BY s.splitting_key_id DESC
+    </select>
+</mapper>
